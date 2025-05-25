@@ -1,30 +1,45 @@
 import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 export default function Login() {
+  const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  function HandleLogin(e){
+  const [username, setUsername] = useState(null);
+  const [password, setPassword] = useState(null);
+  async function HandleLogin(e) {
     e.preventDefault();
-    console.log(username,password)
-    setUsername("");
-    setPassword("");
+    if (username && password) {
+      try {
+        const response = await axios.post("http://localhost:8080/api/v1/user/login",
+          {
+            email: username,
+            password
+          }
+        )
+        window.localStorage.setItem("username", response.data.username);
+        window.localStorage.setItem("isAdmin", response.data.role === 'admin' ? true : false);
+        navigate('/')
+      } catch (e) {
+        console.error(e)
+      }
+    }
   }
   return (
     <div className="flex flex-col justify-center items-center h-screen bg-slate-200">
       <div className="flex justify-between gap-10 my-4">
         <button
           onClick={() => setIsAdmin(!isAdmin)}
-          className={`w-auto justify-center py-2 px-4 bg-gray-500 hover:bg-gray-600 active:bg-gray-700 rounded-md text-white ring-2 cursor-pointer ${isAdmin ? "" : "border-2 border-black bg-black" }`}>Faculty Login</button>
+          className={`w-auto justify-center py-2 px-4 bg-gray-500 hover:bg-gray-600 active:bg-gray-700 rounded-md text-white ring-2 cursor-pointer ${isAdmin ? "" : "border-2 border-black bg-black"}`}>Faculty Login</button>
         <button
           onClick={() => setIsAdmin(!isAdmin)}
-          className={`w-auto justify-center py-2 px-4 bg-gray-500 hover:bg-gray-600 active:bg-gray-700 rounded-md text-white ring-2 cursor-pointer ${isAdmin ? "border-2 border-black bg-black" : "" }`}>Admin Login</button>
+          className={`w-auto justify-center py-2 px-4 bg-gray-500 hover:bg-gray-600 active:bg-gray-700 rounded-md text-white ring-2 cursor-pointer ${isAdmin ? "border-2 border-black bg-black" : ""}`}>Admin Login</button>
       </div>
       <div className="w-80 rounded-lg shadow h-auto p-6 bg-white relative overflow-hidden bg-gray">
         <div className="flex flex-col justify-center items-center space-y-2">
           <h2 className="text-2xl font-medium text-slate-700">{isAdmin ? "Admin " : "Faculty "}Login</h2>
           <p className="text-slate-500">Enter details below.</p>
         </div>
-        <form className="w-full mt-4 space-y-3" onSubmit={(e)=>HandleLogin(e)}>
+        <form className="w-full mt-4 space-y-3" onSubmit={(e) => HandleLogin(e)}>
           <div>
             <input
               className="outline-none border-2 rounded-md px-2 py-1 text-slate-500 w-full focus:border-gray-700"
